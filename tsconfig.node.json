@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    /* ✅ Silencia los avisos por cambios en TS 7 */
+    "ignoreDeprecations": "6.0",
+
+    /* 🧠 Mantén la versión más moderna posible */
+    "target": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+
+    /* 📦 Configuración base */
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* ⚙️ Recomendado para Vite / React moderno */
+    "module": "ESNext",
+    "moduleResolution": "bundler", // <-- Moderno, reemplaza "Node"
+
+    /* ✅ Permite importar JSON y evita errores */
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* 🛣️ Alias para imports limpios */
+    "baseUrl": "./src",
+    "paths": {
+      "@api/*": ["api/*"],
+      "@components/*": ["components/*"],
+      "@pages/*": ["pages/*"],
+      "@routes/*": ["routes/*"],
+      "@services/*": ["services/*"],
+      "@styles/*": ["styles/*"],
+      "@context/*": ["context/*"]
+    }
+  },
+  "include": ["src"]
+}
