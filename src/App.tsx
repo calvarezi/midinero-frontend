@@ -1,8 +1,12 @@
-import React from "react";
-import AppRouter from "@routes/AppRouter";
+// src/App.jsx
+import { useEffect } from "react";
+import AppRouter from "./routes/AppRouter";
+import { testConnection } from "./api/testConnection";
 
-const App: React.FC = () => {
+export default function App() {
+  useEffect(() => {
+    testConnection();
+  }, []);
+
   return <AppRouter />;
-};
-
-export default App;
+}

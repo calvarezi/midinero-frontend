@@ -1,33 +1,32 @@
-// src/context/AuthContext.jsx
-import { createContext, useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";  // Solo se usa dentro del router
-import { useLocation } from "react-router-dom";
+import { createContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    !!sessionStorage.getItem("access_token")
-  );
-
-  const navigate = useNavigate();  // Solo funciona dentro del Router
-
-  useEffect(() => {
-    // Si no hay token en sessionStorage, redirige al login
-    if (!sessionStorage.getItem("access_token")) {
-      setIsAuthenticated(false);
-      navigate("/login");
-    } else {
-      setIsAuthenticated(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!sessionStorage.getItem("access_token");
+  });
+  const [user, setUser] = useState(() => {
+    const storedUser = sessionStorage.getItem("user");
+    try {
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch {
+      return null;
     }
-  }, [navigate]);
+  });
 
-  const login = (access, refresh, user) => {
+  const navigate = useNavigate();
+
+  const login = (access, refresh, userData) => {
     sessionStorage.setItem("access_token", access);
     sessionStorage.setItem("refresh_token", refresh);
-    if (user) sessionStorage.setItem("user", JSON.stringify(user));
+    if (userData) {
+      sessionStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
+    }
     setIsAuthenticated(true);
-    navigate("/dashboard");
+    navigate("/dashboard", { replace: true });
   };
 
   const logout = () => {
@@ -35,16 +34,30 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.removeItem("refresh_token");
     sessionStorage.removeItem("user");
     setIsAuthenticated(false);
-    navigate("/login");
+    setUser(null);
+    navigate("/login", { replace: true });
   };
+
+  const checkAuth = () => {
+    const token = sessionStorage.getItem("access_token");
+    if (!token && isAuthenticated) {
+      setIsAuthenticated(false);
+      setUser(null);
+    }
+  };
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
   return (
     <AuthContext.Provider
       value={{
         isAuthenticated,
-        setIsAuthenticated,
+        user,
         login,
         logout,
+        checkAuth,
       }}
     >
       {children}
