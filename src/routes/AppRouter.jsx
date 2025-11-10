@@ -14,6 +14,7 @@ import GoalDetails from "../pages/Goals/GoalDetails"; // Detalles de metas
 import TransactionListPage from "../pages/Transactions/TransactionListPage"; // Página de transacciones
 import CategoryListPage from "../pages/Categories/CategoryListPage"; // Página de categorías
 import CategoryForm from "../pages/Categories/CategoryForm"; // Formulario de categorías
+import TransactionListForm from "../pages/Transactions/TransactionListForm";
 
 
 export default function AppRouter() {
@@ -55,6 +56,9 @@ export default function AppRouter() {
 
         {/* Rutas de transacciones */}
         <Route path="transactions" element={<TransactionListPage />} />
+        <Route path="transactions/new" element={<TransactionListForm />} />
+        <Route path="transactions/:id/edit" element={<TransactionListForm />} />
+
 
         {/* Rutas de categorías */}
         <Route path="categories" element={<CategoryListPage />} />
