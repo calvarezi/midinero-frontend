@@ -1,58 +1,69 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getCategoryById, createCategory, updateCategory } from "../../api/categoryService"; // Servicios para obtener, crear y actualizar categorías
+import {
+  getCategoryById,
+  createCategory,
+  updateCategory,
+} from "../../api/categoryService";
 
 const CategoryForm = () => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const [formData, setFormData] = useState({ name: "", description: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const { id } = useParams(); // Obtener el ID de la categoría si estamos editando
+  const { id } = useParams();
   const navigate = useNavigate();
 
-  // Si estamos editando, obtenemos la categoría desde el backend
+  // Cargar datos si estamos editando una categoría
   useEffect(() => {
-    if (id) {
-      const fetchCategory = async () => {
-        try {
-          setLoading(true);
-          const category = await getCategoryById(id);
-          setName(category.name);
-          setDescription(category.description);
-        } catch (error) {
-          console.error("Error fetching category:", error);
-          setError("No se pudo cargar la categoría.");
-        } finally {
-          setLoading(false);
-        }
-      };
+    if (!id) return;
 
-      fetchCategory();
-    }
+    const fetchCategory = async () => {
+      setLoading(true);
+      try {
+        const category = await getCategoryById(id);
+        setFormData({
+          name: category.name || "",
+          description: category.description || "",
+        });
+      } catch (err) {
+        console.error("Error fetching category:", err);
+        setError("No se pudo cargar la categoría.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategory();
   }, [id]);
+
+  // Manejar cambios en el formulario
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+    setLoading(true);
 
     try {
-      const categoryData = { name, description };
+      const payload = { ...formData };
 
       if (id) {
-        // Si tenemos un ID, estamos actualizando una categoría
-        await updateCategory(id, categoryData);
+        await updateCategory(id, payload);
       } else {
-        // Si no hay ID, estamos creando una nueva categoría
-        await createCategory(categoryData);
+        await createCategory(payload);
       }
 
-      // Redirigir al listado de categorías después de guardar
       navigate("/categories");
-    } catch (error) {
-      console.error("Error saving category:", error);
+    } catch (err) {
+      console.error("Error saving category:", err);
       setError("Hubo un error al guardar la categoría.");
     } finally {
       setLoading(false);
@@ -65,51 +76,69 @@ const CategoryForm = () => {
         {id ? "Editar Categoría" : "Crear Nueva Categoría"}
       </h1>
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        {/* Nombre de la categoría */}
+      <form
+        onSubmit={handleSubmit}
+        className="mt-6 space-y-5 max-w-lg mx-auto bg-white p-6 rounded-xl shadow-md"
+      >
+        {/* Campo: Nombre */}
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="name"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Nombre de la Categoría
           </label>
           <input
             type="text"
             id="name"
             name="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+            value={formData.name}
+            onChange={handleChange}
             required
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
+            placeholder="Ej. Alimentación, Transporte..."
           />
         </div>
 
-        {/* Descripción de la categoría */}
+        {/* Campo: Descripción */}
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Descripción
           </label>
           <textarea
             id="description"
             name="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
             rows="4"
+            value={formData.description}
+            onChange={handleChange}
             required
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
+            placeholder="Describe brevemente la categoría..."
           />
         </div>
 
-        {/* Botón de envío */}
+        {/* Mensaje de error */}
         {error && <p className="text-red-600 text-sm">{error}</p>}
 
-        <div className="mt-6">
-          <button
-            type="submit"
-            disabled={loading}
-            className="inline-block w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-          >
-            {loading ? "Guardando..." : id ? "Actualizar Categoría" : "Crear Categoría"}
-          </button>
-        </div>
+        {/* Botón de envío */}
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full py-2 px-4 rounded-lg text-white transition-colors ${
+            loading
+              ? "bg-blue-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+          }`}
+        >
+          {loading
+            ? "Guardando..."
+            : id
+            ? "Actualizar Categoría"
+            : "Crear Categoría"}
+        </button>
       </form>
     </div>
   );

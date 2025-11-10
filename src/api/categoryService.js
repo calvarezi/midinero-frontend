@@ -1,33 +1,41 @@
-import axios from "axios";
-
-const API_URL = "/api/categories"; // URL de tu API para categorías
+// src/api/categoryService.js
+import api from "./axiosConfig";
 
 // Obtener todas las categorías
-export const getCategories = async () => {
-  const response = await axios.get(API_URL);
-  return response.data;
+const getCategories = async () => {
+  const response = await api.get("/api/finances/categories/");
+  return response.data.data || response.data.results || response.data;
 };
 
 // Obtener una categoría por ID
-export const getCategoryById = async (id) => {
-  const response = await axios.get(`${API_URL}/${id}`);
-  return response.data;
+const getCategoryById = async (id) => {
+  const response = await api.get(`/api/finances/categories/${id}/`);
+  return response.data.data || response.data;
 };
 
 // Crear una nueva categoría
-export const createCategory = async (categoryData) => {
-  const response = await axios.post(API_URL, categoryData);
-  return response.data;
+const createCategory = async (categoryData) => {
+  const response = await api.post("/api/finances/categories/", categoryData);
+  return response.data.data || response.data;
 };
 
 // Actualizar una categoría existente
-export const updateCategory = async (id, categoryData) => {
-  const response = await axios.put(`${API_URL}/${id}`, categoryData);
+const updateCategory = async (id, categoryData) => {
+  const response = await api.put(`/api/finances/categories/${id}/`, categoryData);
+  return response.data.data || response.data;
+};
+
+// Eliminar una categoría
+const deleteCategory = async (id) => {
+  const response = await api.delete(`/api/finances/categories/${id}/`);
   return response.data;
 };
 
-// Eliminar una categoria
-export const deleteCategory = async (id) => {
-  const response = await axios.delete(`${API_URL}/${id}`);
-  return response.data;
+// ✅ Exportaciones nombradas
+export {
+  getCategories,
+  getCategoryById,
+  createCategory,
+  updateCategory,
+  deleteCategory,
 };

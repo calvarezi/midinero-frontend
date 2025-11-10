@@ -26,23 +26,17 @@ const BudgetForm = () => {
 
   const [errors, setErrors] = useState({});
 
-  const { data: categoriesData, isLoading: loadingCategories } = useQuery(
-    "categories",
-    async () => {
-      const response = await api.get("/api/finances/categories/");
-      const data = response.data.data || response.data.results || response.data;
-      return Array.isArray(data) ? data : [];
-    }
-  );
+const { data: categoriesData, isLoading: loadingCategories } = useQuery(
+  "categories",
+  () => getCategories()
+);
 
-  const { data: budgetData, isLoading: loadingBudget } = useQuery(
-    ["budget", id],
-    async () => {
-      const response = await api.get(`/api/finances/budgets/${id}/`);
-      return response.data.data || response.data;
-    },
-    { enabled: isEditing }
-  );
+
+const { data: budgetData, isLoading: loadingBudget } = useQuery(
+  ["budget", id],
+  () => getBudgetById(id), 
+  { enabled: isEditing }
+);
 
   useEffect(() => {
     if (budgetData && isEditing) {
@@ -55,25 +49,25 @@ const BudgetForm = () => {
     }
   }, [budgetData, isEditing]);
 
-  const mutation = useMutation(
-    async (data) => {
-      if (isEditing) {
-        return await api.put(`/api/finances/budgets/${id}/`, data);
-      } else {
-        return await api.post("/api/finances/budgets/", data);
-      }
-    },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries("budgets");
-        navigate("/budgets");
-      },
-      onError: (error) => {
-        const errorData = error.response?.data?.errors || {};
-        setErrors(errorData);
-      },
+const mutation = useMutation(
+  async (data) => {
+    if (isEditing) {
+      return await updateBudget(id, data); 
+    } else {
+      return await createBudget(data);
     }
-  );
+  },
+  {
+    onSuccess: () => {
+      queryClient.invalidateQueries("budgets");
+      navigate("/budgets");
+    },
+    onError: (error) => {
+      const errorData = error.response?.data?.errors || {};
+      setErrors(errorData);
+    },
+  }
+);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

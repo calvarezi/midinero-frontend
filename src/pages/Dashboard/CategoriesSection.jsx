@@ -1,55 +1,42 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { getCategories } from "../../api/categoryService"; // Servicio para obtener las categorías (puedes ajustarlo)
+import { getCategories } from "../../api/categoryService";
 
-const CategoriesSections = () => {
+const CategoriesSection = () => {
   const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // Fetch categories from the backend
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        setLoading(true);
-        const response = await getCategories(); // Llamada al servicio para obtener categorías
-        setCategories(response);
-        setLoading(false);
-      } catch (err) {
-        setError("Error al cargar las categorías.");
-        setLoading(false);
+        const data = await getCategories();
+        // Asegurar que sea un array
+        setCategories(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
       }
     };
 
     fetchCategories();
   }, []);
 
-  if (loading) {
-    return <div>Cargando categorías...</div>;
-  }
-
-  if (error) {
-    return <div>{error}</div>;
-  }
-
   return (
-    <div className="categories-section">
-      <h2 className="text-xl font-bold text-gray-800 mb-4">Categorías</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {categories.map((category) => (
-          <div
-            key={category.id}
-            className="bg-white p-4 rounded-lg shadow-lg hover:bg-blue-50 transition"
-          >
-            <Link to={`/categories/${category.id}`} className="block">
-              <h3 className="text-lg font-semibold text-gray-700">{category.name}</h3>
-              <p className="text-sm text-gray-500">{category.description}</p>
-            </Link>
-          </div>
-        ))}
-      </div>
+    <div className="categories-section p-4 bg-white rounded-xl shadow">
+      <h2 className="text-xl font-semibold text-gray-800 mb-3">Categorías</h2>
+      {categories.length === 0 ? (
+        <p className="text-gray-500">No hay categorías disponibles.</p>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {categories.map((category) => (
+            <div
+              key={category.id}
+              className="p-3 bg-blue-50 rounded-lg text-blue-800 font-medium text-center"
+            >
+              {category.name}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-export default CategoriesSections;
+export default CategoriesSection;

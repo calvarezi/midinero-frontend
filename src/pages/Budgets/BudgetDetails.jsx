@@ -20,13 +20,10 @@ const BudgetDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { data: budget, isLoading, isError } = useQuery(
-    ["budget", id],
-    async () => {
-      const response = await api.get(`/api/finances/budgets/${id}/`);
-      return response.data.data || response.data;
-    }
-  );
+const { data: budget, isLoading, isError } = useQuery(
+  ["budget", id],
+  () => getBudgetById(id)
+);
 
   const { data: transactions } = useQuery(
     ["budget-transactions", id, budget?.category, budget?.month],

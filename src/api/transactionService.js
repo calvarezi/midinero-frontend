@@ -5,7 +5,6 @@ import api from './axiosConfig';  // Importa la instancia global de axios
 export const getTransactions = async () => {
   try {
     const response = await api.get("/api/finances/transactions/");
-    console.log("Fetched transactions:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching transactions:", error);
@@ -28,6 +27,7 @@ export const deleteTransaction = async (id) => {
 export const getTransactionById = async (id) => {
   try {
     const response = await api.get(`/api/finances/transactions/${id}/`);
+    return response.data.data || response.data; // ✅ Agregado return
   } catch (error) {
     console.error(`Error fetching transaction with id ${id}:`, error);
     throw error;

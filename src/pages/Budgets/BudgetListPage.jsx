@@ -5,15 +5,15 @@ import { getBudgets, deleteBudget } from "../../api/budgetService";
 import api from "../../api/axiosConfig";
 import { formatCurrency, formatDate } from "../../utils/formatters";
 import Loader from "../../components/ui/Loader";
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  AlertTriangle, 
-  CheckCircle, 
+import {
+  Plus,
+  Edit,
+  Trash2,
+  AlertTriangle,
+  CheckCircle,
   TrendingUp,
   Filter,
-  Calendar
+  Calendar,
 } from "lucide-react";
 
 const BudgetListPage = () => {
@@ -25,22 +25,14 @@ const BudgetListPage = () => {
 
   const { data, isLoading, isError } = useQuery(
     ["budgets", selectedMonth],
-    async () => {
-      const response = await api.get("/api/finances/budgets/");
-      return response.data.data || response.data;
-    }
+    () => getBudgets(selectedMonth)
   );
 
-  const deleteMutation = useMutation(
-    async (id) => {
-      await api.delete(`/api/finances/budgets/${id}/`);
+  const deleteMutation = useMutation((id) => deleteBudget(id), {
+    onSuccess: () => {
+      queryClient.invalidateQueries("budgets");
     },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries("budgets");
-      },
-    }
-  );
+  });
 
   const handleDelete = (id, categoryName) => {
     if (window.confirm(`¿Eliminar presupuesto de ${categoryName}?`)) {
@@ -92,7 +84,8 @@ const BudgetListPage = () => {
     (sum, b) => sum + parseFloat(b.spent_amount || 0),
     0
   );
-  const overallProgress = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
+  const overallProgress =
+    totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
 
   return (
     <div className="space-y-6">
